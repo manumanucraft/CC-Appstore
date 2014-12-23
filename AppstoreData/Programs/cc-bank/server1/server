@@ -1,0 +1,122 @@
+local lenght = 4 --Max account number lenght (if it's wrong the program will be very very buggy)
+local sides = {"top","bottom","left","right","front","back"}
+for i = 1,6 do
+  a = sides[i]
+  if peripheral.getType(a) == "modem" then
+    rednet.open(a)
+    break
+  end
+end
+while true do
+for i = 1,6 do
+  a = sides[i]
+  if peripheral.getType(a) == "drive" then
+    dr = a
+    drive = peripheral.wrap(a)
+    break
+  end
+end
+  id,msg,protocol = rednet.receive()
+  print("ID: "..id..", msg: "..msg..", protocol: "..protocol)
+  if protocol == "money" then
+    if not fs.exists("disk/"..msg) then
+      print("[CREATE] Created account "..msg.." with 0$")
+      rednet.send(id,"new")
+      file = fs.open("disk/"..msg,"w")
+      file.write("0")
+      file.close()
+    else
+      file = fs.open("disk/"..msg,"r")
+      money = file.readAll()
+      file.close()
+      print(msg.." has "..money.."$")
+      rednet.send(id,money)
+    end
+  elseif protocol == "exchange" then
+    f = string.sub(msg,1,5)
+    print("F: "..f)
+    u = string.sub(msg,6,lenght+5)
+    print("U: "..u)
+    if fs.exists("disk/codes/"..f) then
+      f = fs.open("disk/codes/"..f,"r")
+      m = f.readAll()
+      a = fs.open("disk/"..u,"r")
+      m2 = a.readAll()
+      a.close()
+      a = fs.open("disk/"..u,"w")
+      a.write(tonumber(m2)+tonumber(m))
+      a.close()
+      f.close()
+      fs.remove("disk/codes/"..f)
+      rednet.send(id,m)
+      print(u.."Exchanged code "..f.." containing "..m.."$")
+    else
+      rednet.send(id,"err")
+      print(u.." Tried to exchange code "..f)
+    end
+  elseif protocol == "get" then
+    u = tonumber(string.sub(msg,1,lenght))+0
+    print("U: "..u)
+    m = string.sub(msg,lenght+1,#msg)
+    print("M: "..m)
+    c = math.random(9999)
+    while fs.exists("disk/codes/"..tostring(c)) do
+      c = math.random(9999)
+    end
+    print("C: "..c)
+      a = fs.open("disk/"..u,"r")
+      m2 = a.readAll()
+      a.close()
+      if m <= m2 then
+          a = fs.open("disk/"..u,"w")
+          a.write(tonumber(m2)-tonumber(m))
+          a.close()
+          a = fs.open("disk/codes/"..c,"w")
+          a.write(m)
+          a.close()
+      else
+          rednet.send(id,"err")
+      end
+  else
+    from = string.sub(msg,1,lenght)
+    for i = 1,4 do
+      if string.sub(from,1,1) == "0" and #from >1 then
+        from = string.sub(from,2,#from)
+      end
+    end
+    moneyr = string.sub(msg,lenght+1,string.len(msg))
+    money = tonumber(money)
+    to = protocol
+    dir = "disk/"..from
+    file1 = fs.open(dir,"r")
+    money1 = tonumber(file1.readAll())
+    file1.close()
+    if money1 >= tonumber(money) then
+      file1 = fs.open("disk/"..from,"w")
+      file1.write(money1-money)
+      file1.close()
+      print("[PAY] Taken from "..from.." "..money.."$")
+      rednet.send(id,200)
+      if fs.exists("disk/"..to) then
+        to = tonumber(to)+0
+        print("[DEBUG] to = "..to)
+        file2 = fs.open("disk/"..to,"r")
+        money2 = file2.readAll()
+        print("[DEBUG] money2 = "..money2)
+        file2.close()
+        file2 = fs.open("disk/"..to,"w")
+        file2.write(tonumber(money2)+money)
+        file2.close()
+        print("[PAY] Payed "..money.."$ to "..to)
+      else
+        file2 = fs.open("money/"..to,"w")
+        file2.write(money)
+        file2.close()
+        print("[CREATE] Created account "..to.." with "..money.."$")
+        print("[PAY] Payed "..money.."$ to "..to)
+      end
+    else
+      print("[ERROR] "..from.." hasn't got enough money")   
+    end
+  end
+end

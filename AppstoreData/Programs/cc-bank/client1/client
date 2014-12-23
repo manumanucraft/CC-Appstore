@@ -1,0 +1,162 @@
+local lenght = 4 --Max lenght of account number (must be the same that in server)
+local server = 0 --Change to Server's ID
+local sides = {"top","bottom","left","right","front","back"}--Change to use cable
+local sItem = 1 --Only a needed local
+local ad = "" --Another local
+for i = 1,6 do
+  a = sides[i]
+  if peripheral.getType(a) == "modem" then
+    rednet.open(a)
+    break
+  end
+end
+while true do
+term.clear()
+term.setCursorPos(1,1)
+for i = 1,6 do
+  a = sides[i]
+  if peripheral.getType(a) == "drive" then
+    dr = a
+    drive = peripheral.wrap(a)
+    d = disk.getID(a)
+    break
+  end
+end
+  term.setBackgroundColor(colors.white)
+  term.clear()
+  term.setTextColor(colors.black)
+  term.setCursorPos(4,4)
+  term.write("Select method")
+  if sItem == 1 then
+    term.setCursorPos(3,5)
+    term.write("[MONEY]")
+  else
+    term.setCursorPos(4,5)
+    term.write("MONEY")
+  end
+  if sItem == 2 then
+    term.setCursorPos(3,6)
+    term.write("[PAY]")
+  else
+    term.setCursorPos(4,6)
+    term.write("PAY")
+  end
+  if sItem == 3 then
+    term.setCursorPos(3,7)
+    term.write("[EXCHANGE CODE]")
+  else
+    term.setCursorPos(4,7)
+    term.write("EXCHANGE CODE")
+  end
+  if sItem == 4 then
+    term.setCursorPos(3,8)
+    term.write("[GET A CODE]")
+  else
+    term.setCursorPos(4,8)
+    term.write("GET A CODE")
+  end
+  if sItem == 5 then
+    sItem = 1
+  elseif sIitem == 0 then
+    sItem = 4
+  end
+  local evt,key = os.pullEventRaw("key")
+  if key == keys.down then
+    sItem = sItem+1
+  elseif key == keys.up then
+    sItem = sItem-1
+  elseif key == keys.enter then
+    if sItem == 1 then
+      term.clear()
+      rednet.send(server,d,"money")
+      local id,msg = rednet.receive(5)
+      if type(msg) ~= "string" then
+        term.setCursorPos(5,5)
+        term.write("ERROR: Timeout. Press a key.")
+        local _,_ = os.pullEvent("key")
+      else
+        if msg == "new" then
+          term.setCursorPos(5,5)
+          term.write("You have 0$ because your account")
+          term.setCursorPos(5,6)
+          term.write("Are in this moment being created")
+          term.setCursorPos(5,7)
+          term.write("Press any key to continue...")
+          local _,_ = os.pullEvent("key")
+        else
+          term.setCursorPos(5,5)
+          term.write("You have in this moment "..msg.."$")
+          term.setCursorPos(5,6)
+          term.write("Press any key to continue...")
+          os.pullEvent("key")
+        end
+      end
+    elseif sItem == 2 then
+      term.clear()
+      term.setCursorPos(5,5)
+      term.write("Input receiver ID: ")
+      rec = io.read()
+      len = lenght-#tostring(d)
+      for i = 1,len do
+        ad = ad.."0"
+      end
+      ad = ad..tostring(d)
+      term.setCursorPos(5,7)
+      f = ad..tostring(d)
+      term.write("Money you want to send: ")
+      amount = io.read()
+      rednet.send(server,f..amount,rec)
+      term.setCursorPos(5,10)
+      term.write("Press any key to continue...")
+      os.pullEvent("key")
+    elseif sItem == 3 then
+      term.clear()
+      term.setCursorPos(3,3)
+      term.write("Input code: ")
+      code = io.read()
+      rednet.send(server,code,"exchange")
+      id,msg,protocol = rednet.receive(5)
+      if type(msg) ~= "string" then
+        term.setCursorPos(3,5)
+        term.write("Timeout...")
+      else
+        if msg == "err" then
+          term.setCursorPos(3,5)
+          term.write("Error")
+        else
+          term.setCursorPos(3,5)
+          term.write("Value: "..msg)
+        end
+      end
+      os.pullEvent("key")
+    elseif sItem == 4 then
+      term.clear()
+      term.setCursorPos(3,3)
+      term.write("Money Quantity? ")
+      m = io.read()
+      len = lenght-#tostring(d)
+      for i = 1,len do
+        ad = ad.."0"
+      end
+      msg = ad..m
+      rednet.send(server,msg,"get")
+      id,msg,protocol = rednet.receive(5)
+      if type(msg) ~= "string" then
+        term.setCursorPos(3,5)
+        term.write("Timeout...")
+      else
+        if msg == "err" then
+          term.setCursorPos(3,5)
+          term.write("Error. Do you have enough money?")
+        else
+          term.setCursorPos(3,5)
+          term.write("Your code: "..msg)
+        end
+        _,y = term.getCursorPos()
+        term.setCursorPos(3,y+2)
+        term.write("Press any key to continue...")
+        os.pullEvent("key")
+      end
+    end
+  end
+end

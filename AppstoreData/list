@@ -2,12 +2,17 @@
   {
   "name" = "CC-Bank",
   "author" = "manumanucraft",
+  "code" = "cc-bank"
   "versions" = {
       {
-      "name" = "Server v1"
+      "name" = "Server v1",
+      "code" = "server1",
+      "files" = {"server"}
       },
       {
-      "name" = "Client v1"
+      "name" = "Client v1",
+      "code" = "client1",
+      "files" = "client"
       }
     }
   },

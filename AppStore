@@ -1,8 +1,8 @@
-local list = textutils.unserialize(http.get("http://cc-appstore.googlecode.com/svn/branches/master/.AppStore/list").readAll())
+local list = textutils.unserialize(http.get("http://raw.github.com/manumanucraft/CC-Appstore/master/AppstoreData/list").readAll())
 local function install2()
 info = program[sItem]
 for k,v in ipairs(info.files) do
-code = http.get("http://cc-appstore.googlecode.com/svn/branches/master/.AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v).readAll()
+code = http.get("http://raw.github.com/manumanucraft/CC-Appstore/master/AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v).readAll()
 a = fs.open(".AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v,"w")
 a.write(code)
 a.close()
