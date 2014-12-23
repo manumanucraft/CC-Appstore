@@ -3,7 +3,7 @@ local function install2()
 info = program[sItem]
 for k,v in ipairs(info.files) do
 code = http.get("http://raw.github.com/manumanucraft/CC-Appstore/master/AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v).readAll()
-a = fs.open(".AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v,"w")
+a = fs.open("AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v,"w")
 a.write(code)
 a.close()
 end
