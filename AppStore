@@ -1,0 +1,57 @@
+local list = textutils.unserialize(http.get("http://cc-appstore.googlecode.com/svn/branches/master/.AppStore/list").readAll())
+local function install2()
+info = program[sItem]
+for k,v in ipairs(info.files) do
+code = http.get("http://cc-appstore.googlecode.com/svn/branches/master/.AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v).readAll()
+a = fs.open(".AppstoreData/Programs/"..pcode.."/"..info.code.."/"..v,"w")
+a.write(code)
+a.close()
+end
+return
+end
+local function install()
+	program = list[sItem].versions
+	p2 = program
+	sItem = 1
+	while true do
+		term.clear()
+		term.setCursorPos(1,1)
+		p2[sItem].name = "[ "..p2[sItem].name.." ]"
+		textutils.tabulate(p2)
+		_,key = os.pullEventRaw("key")
+		if key == keys.down then
+			sItem = sItem+1
+		elseif key == keys.up then
+			sItem = sItem - 1
+		elseif key == keys.enter then
+			install2()
+		end
+		if sItem == 0 then
+		 sItem = #p2
+		elseif sItem == #p2 +1 then
+			sItem = 0
+		end
+	end
+end
+while true do
+  term.clear()
+  term.setCursorPos(1,1)
+  a = list
+  a[sItem].name = "[ "..a[sItem].name.." ]"
+  textutils.tabulate(a)
+  _,key = os.pullEvent("key")
+  if key == keys.down then
+    sItem = sItem + 1
+  elseif key == keys.up then
+	sItem = sItem - 1
+  elseif key == keys.enter then
+    pcode = list[sItem].code
+    install()
+    return
+  end
+  if sItem == 0 then
+	sItem = #a
+  elseif sItem == #a+1 then
+	sItem = 1
+  end
+end
